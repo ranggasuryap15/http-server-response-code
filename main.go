@@ -22,12 +22,35 @@ func IsNameExists(name string) bool {
 }
 
 func CheckStudentName() http.HandlerFunc {
-	return nil // TODO: replace this
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte("Method is not allowed"))
+			return
+		}
+		paramName := r.URL.Query().Get("name")
+		if paramName == "" {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Data not found"))
+			return
+		}
+
+		exist := IsNameExists(paramName)
+		if !exist {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Data not found"))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Name is exists"))
+
+	}
 }
 
 func GetMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	// TODO: answer here
+	mux.HandleFunc("/students", CheckStudentName())
 	return mux
 }
 
